@@ -44,17 +44,35 @@ module.exports = {
 
         })
     },
-    basket(bot,chatId,back){
+    basket(bot,chatId){
         bot.sendMessage(chatId,frases.basket_is_empty,{
             reply_markup:{
-                inline_keyboard:[
-                    [{
-                        text:  'Назад 🔙',
-                        callback_data: kb.home.order.callback_data
-                    }]
-                ]
+                inline_keyboard:[[kb.back_to_categories,kb.back_to_home]]
             }
         })
+    },
+    sendUnits(bot,id,category){
+        firebase.database().ref('goods/').once('value',function (snapshot) {
+            var goods = snapshot.val();
+            if(goods[category]!=null){
+                goods = goods[category];
+                var key = [];
+                for(var temp in goods){
+                    key.push([kb.unitButton(goods[temp])])
+                }
+                key.push([kb.back_to_categories,kb.back_to_home])
+                bot.sendMessage(id,frases.titles[category],{
+                    reply_markup:{
+                        inline_keyboard:key
+                    }
+                })
+            }else {
+                bot.sendMessage(id,frases.empty,keyboard.categories)
+            }
+        })
+    },
+    addUnit(chatId,unitId){
+        //firebase.database().ref()
     }
 }
 // sendUnit(bot,id,firebase,match,count){
@@ -127,48 +145,7 @@ module.exports = {
 //         }
 //     }
 // },
-// spbDeliv(){
-//     var dates = getSpbOffsetDate();
-//     //console.log(dates)
-//     var key = []
-//     for(var i = 0; i<dates.length; i++){
-//         key.push([{
-//             text: dates[i],
-//             callback_data: JSON.stringify({
-//                 type: 'delivDate',
-//                 date:dates[i]
-//             })
-//         }])
-//     }
-//     key.push([kb.basket('back_to_home')]);
-//     key.push([kb.back_to_home]);
-//     return {
-//         reply_markup: {
-//             inline_keyboard: key
-//         }
-//     }
-// },
-// murDeliv(){
-//     var dates = getmurOffsetDate();
-//     //console.log(dates)
-//     var key = []
-//     for(var i = 0; i<dates.length; i++){
-//         key.push([{
-//             text: dates[i],
-//             callback_data: JSON.stringify({
-//                 type: 'delivDate',
-//                 date:dates[i]
-//             })
-//         }])
-//     }
-//     key.push([kb.basket('back_to_home')]);
-//     key.push([kb.back_to_home]);
-//     return {
-//         reply_markup: {
-//             inline_keyboard: key
-//         }
-//     }
-// }
+
 
 function sendHome(bot,chatId) {
     bot.sendPhoto(chatId, frases.label_url, {

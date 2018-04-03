@@ -1,16 +1,14 @@
-
-
 module.exports = {
     home: {
         order: {
             text: 'Сделать заказ',
             callback_data: 'order'
         },
-        about_stock:{
+        about_stock: {
             text: 'Об ассортименте',
             callback_data: 'about_stock'
         },
-        about_company:{
+        about_company: {
             text: 'О компании',
             callback_data: 'about_company'
         }
@@ -19,10 +17,10 @@ module.exports = {
         text: 'Домой 🏠',
         callback_data: 'back_to_home'
     },
-    // back_to_categories: {
-    //     text: 'Назад 🔙',
-    //     callback_data: 'back_to_categories'
-    // },
+    back_to_categories: {
+        text: 'Сделать заказ',
+        callback_data: 'back_to_categories'
+    },
     feedback: {
         text: 'Написать директору',
         callback_data: 'feedback'
@@ -33,12 +31,21 @@ module.exports = {
             callback_data: JSON.stringify({
                 type: 'basket',
                 back: back
-        })
+            })
         }
     },
     submitOrder: {
-            text: 'Оформить заказ',
-            callback_data: 'addressAsk'
+        text: 'Оформить заказ',
+        callback_data: 'addressAsk'
+    },
+    unitButton(unit) {
+        return {
+            text: unit.title +' - '+unit.price+'₽',
+            callback_data: JSON.stringify({
+                type: 'unit',
+                id: unit.id
+            })
+        }
     }
     // back_to_some_category(unit) {
     //     return {

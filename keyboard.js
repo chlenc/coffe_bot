@@ -36,41 +36,41 @@ module.exports = {
                 [{
                     text: 'Кофе',
                     callback_data: JSON.stringify({
-                        type: 'unit',
+                        type: 'category',
                         unit: 'coffee'
                     })
                 },
                     {
                         text: 'Чаи',
                         callback_data: JSON.stringify({
-                            type: 'unit',
+                            type: 'category',
                             unit: 'tea'
                         })
                     }],
                 [{
                     text: 'Смузи',
                     callback_data: JSON.stringify({
-                        type: 'unit',
+                        type: 'category',
                         unit: 'smhs'
                     })
                 },{
                     text: 'Фреш',
                     callback_data: JSON.stringify({
-                        type: 'unit',
+                        type: 'category',
                         unit: 'fresh'
                     })
                 }],
                 [{
                     text: 'Молочные коктейли',
                     callback_data: JSON.stringify({
-                        type: 'unit',
+                        type: 'category',
                         unit: 'milks'
                     })
                 }],
                 [{
                     text: 'Сезонные напитки',
                     callback_data: JSON.stringify({
-                        type: 'unit',
+                        type: 'category',
                         unit: 'drinks'
                     })
                 }],
