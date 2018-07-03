@@ -14,7 +14,7 @@ module.exports = {
     start(msg) {
         firebase.database().ref('users/' + msg.chat.id).set(msg.chat);
     },
-    sendHome(bot,chatId) {
+    sendHome(bot, chatId) {
         bot.sendPhoto(chatId, frases.label_url, {
                 caption: frases.home,
                 reply_markup: keyboard.home.reply_markup
@@ -39,40 +39,138 @@ module.exports = {
             }
         }).then(function () {
             setTimeout(function () {
-                sendHome(bot,chatId)
-            }, 1000)
+                sendHome(bot, chatId)
+            }, 500)
 
         })
     },
-    basket(bot,chatId){
-        bot.sendMessage(chatId,frases.basket_is_empty,{
-            reply_markup:{
-                inline_keyboard:[[kb.back_to_categories,kb.back_to_home]]
+    basket(bot, chatId) {
+        firebase.database().ref(`/users/${chatId}/basket`).once('value', function (snapshot) {
+            var data = snapshot.val();
+            if (data === null) {
+                bot.sendMessage(chatId, frases.basket_is_empty, keyboard.emptyBasket)
+            } else {
+                bot.sendMessage(chatId, getCheck(data), keyboard.basket)
             }
         })
     },
-    sendUnits(bot,id,category){
-        firebase.database().ref('goods/').once('value',function (snapshot) {
+    sendUnits(bot, id, category) {
+        firebase.database().ref('goods/').once('value', function (snapshot) {
             var goods = snapshot.val();
-            if(goods[category]!=null){
+            if (goods[category] != null) {
                 goods = goods[category];
                 var key = [];
-                for(var temp in goods){
-                    key.push([kb.unitButton(goods[temp])])
+                if (category === 'smhs' || category === 'coffee' || category === 'fresh') {
+                    for (var temp in goods) {
+                        key.push([kb.checkButton(category, goods[temp], false)])
+                    }
+                    key.push([kb.rebout(category), kb.ready(category, '')])
+                    key.push([kb.back_to_categories, kb.back_to_home])
+                } else if (category === 'tea' || category === 'milks' || category === 'drinks') {
+                    for (var temp in goods) {
+                        key.push([kb.unitButton(goods[temp])])
+                    }
+                    key.push([kb.back_to_categories, kb.back_to_home])
                 }
-                key.push([kb.back_to_categories,kb.back_to_home])
-                bot.sendMessage(id,frases.titles[category],{
-                    reply_markup:{
-                        inline_keyboard:key
+
+                bot.sendMessage(id, frases.titles[category], {
+                    reply_markup: {
+                        inline_keyboard: key
                     }
                 })
-            }else {
-                bot.sendMessage(id,frases.empty,keyboard.categories)
+            } else {
+                bot.sendMessage(id, frases.empty, keyboard.categories)
             }
         })
     },
-    addUnit(chatId,unitId){
-        //firebase.database().ref()
+    checkUnit(bot, id, query) {
+        firebase.database().ref('goods/').once('value', function (snapshot) {
+            var goods = snapshot.val();
+            var category = query.c;
+            if (goods[category] != null) {
+                goods = goods[category];
+                var key = [];
+                var queryIDs = uni(query.id.split('&'));
+                query.id = queryIDs.join('&');
+                var but;
+                for (var temp in goods) {
+                    if (queryIDs.indexOf(goods[temp].id) == -1) {
+                        if (queryIDs.length < 6)
+                            goods[temp].id = (query.id + '&' + goods[temp].id);
+                        but = kb.checkButton(category, goods[temp]);
+                        if (but.callback_data.length <= 64)
+                            key.push([but]);
+                    } else {
+                        if (queryIDs.length < 6)
+                            goods[temp].id = (query.id + '&' + goods[temp].id);
+                        but = kb.checkButton(category, goods[temp], true);
+                        if (but.callback_data.length <= 64)
+                            key.push([but]);
+                    }
+                }
+                console.log('kk')
+
+                key.push([kb.rebout(category), kb.ready(category, query.id)])
+                key.push([kb.back_to_categories, kb.back_to_home])
+
+
+                bot.sendMessage(id, frases.titles[category], {
+                    reply_markup: {
+                        inline_keyboard: key
+                    }
+                })
+            } else {
+                bot.sendMessage(id, frases.empty, keyboard.categories)
+            }
+        })
+    },
+    addUnit(bot, chatId, unitId) {
+        firebase.database().ref(`/goodsById/${unitId}`).once('value', function (snapshot) {
+            var unit = snapshot.val()
+            if (unit === null) {
+                bot.sendMessage(chatId, frases.error_message, keyboard.categories);
+                return
+            }
+            if (unit.type === 'tea' || unit.type === 'milks' || unit.type === 'drinks') {
+                firebase.database().ref(`/users/${chatId}/basket`).push(unit).then(result => {
+                        bot.sendMessage(chatId, frases.successful_add_unit, keyboard.categories);
+                    },
+                    error => {
+                        bot.sendMessage(chatId, frases.error_message, keyboard.categories);
+                    })
+            } else if (unit.type === 'smhs' || unit.type === 'coffee' || unit.type === 'fresh') {
+                bot.sendMessage(chatId, 'В разработке', keyboard.categories);
+            } else {
+                bot.sendMessage(chatId, frases.error_message, keyboard.categories);
+            }
+
+
+        })
+    },
+    clearBasket(bot, chatId) {
+        firebase.database().ref(`users/${chatId}/basket`).remove();
+        bot.sendMessage(chatId, frases.basket_is_empty, keyboard.emptyBasket)
+    },
+    submitOrder(bot, chatId, check) {
+        firebase.database().ref('users/' + chatId).once('value', function (snapshot) {
+            var msg = snapshot.val();
+            if (msg !== null) {
+                var uid = getUid();
+                var text = `${getDateTime()}\n<b>Новый заказ:</b>\n\nИмя: <a href="tg://user?id` +
+                    `=${chatId}">${msg.first_name}</a>\nНомер: ${msg.phone_number}\n\nЗаказ #${uid}:\n` + check;
+
+                bot.sendMessage(applicationChatId, text, {parse_mode: 'HTML'})
+                    .then(() => {
+                        firebase.database().ref(`users/${chatId}/basket`).remove()
+                    }).then(() => {
+                    bot.sendMessage(chatId, frases.order_is_submitted(uid), keyboard.emptyBasket)
+                });
+            }
+        })
+
+    },
+    bottleAsk(bot,chatId,query){
+        bot.sendMessage(chatId,frases.bottle_ask,keyboard.bottle_ask(query))
     }
 }
 // sendUnit(bot,id,firebase,match,count){
@@ -146,8 +244,39 @@ module.exports = {
 //     }
 // },
 
+function getCheck(data) {
+    var order = 'Чек\n\n';
+    var count, price;
+    for (var temp in data) {
+        count = 0;
+        for (var temp2 in data) {
+            if (data[temp].id === data[temp2].id)
+                count++;
+        }
+        data[temp].count = count
+    }
+    for (var temp in data) {
+        data[data[temp].id] = data[temp];
+        delete data[temp]
+    }
+    price = 0;
+    for (var temp in data) {
+        order += `${data[temp].title}: ${data[temp].count} X ` +
+            `${data[temp].price}₽ = ${data[temp].count * data[temp].price}₽\n`
+        price += data[temp].count * data[temp].price;
+    }
+    order += '\nИтоговая цена: ' + price + '₽';
+    return order
+}
 
-function sendHome(bot,chatId) {
+function getUid() {
+    return Math.floor((1 + Math.random()) * 0x10000)
+        .toString(16)
+        .substring(1);
+}
+
+
+function sendHome(bot, chatId) {
     bot.sendPhoto(chatId, frases.label_url, {
             caption: frases.home,
             reply_markup: keyboard.home.reply_markup
@@ -159,6 +288,34 @@ function sendHome(bot,chatId) {
 function getDateTime() {
     var date = new Date()
     return `${('0' + date.getDate()).slice(-2)}.${('0' + (date.getMonth() + 1)).slice(-2)}.${date.getFullYear()} ${('0' + date.getHours()).slice(-2)}:${('0' + date.getMinutes()).slice(-2)}`
+}
+
+function uniq_fast(a) {
+    var seen = {};
+    var out = [];
+    var j = 0;
+    for (var i = 0; i < a.length; i++) {
+        var item = a[i];
+        if (seen[item] !== 1) {
+            seen[item] = 1;
+            out[j++] = item;
+        }
+    }
+    return out;
+}
+
+function uni(arr) {
+
+    var result = arr.reduce(function (acc, el) {
+        acc[el] = (acc[el] || 0) + 1;
+        return acc;
+    }, {});
+    var out = [];
+    for (var temp in result) {
+        if (result[temp] == 1)
+            out.push(temp);
+    }
+    return (out)
 }
 
 //  function getOffsetDate(date,offset,time) {

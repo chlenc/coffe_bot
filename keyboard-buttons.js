@@ -29,21 +29,74 @@ module.exports = {
         return {
             text: 'Заказ 🛒',
             callback_data: JSON.stringify({
-                type: 'basket',
+                t: 'basket',
                 back: back
             })
         }
     },
     submitOrder: {
         text: 'Оформить заказ',
-        callback_data: 'addressAsk'
+        callback_data: 'submitOrder'
+    },
+    clearBasket: {
+        text: 'Очистить корзину 🗑',
+        callback_data: 'clearBasket'
     },
     unitButton(unit) {
         return {
-            text: unit.title +' - '+unit.price+'₽',
+            text: unit.title + ' - ' + unit.price + '₽',
             callback_data: JSON.stringify({
-                type: 'unit',
+                t: 'unit',
                 id: unit.id
+            })
+        }
+    },
+    checkButton(category,unit,isChecked) {
+        var text =(isChecked)?unit.title + ' - ' + unit.price + '₽  ✅': unit.title + ' - ' + unit.price + '₽  ';
+        return {
+            text: text,
+            callback_data: JSON.stringify({
+                t: 'ch',
+                c:category,
+                id: unit.id
+            })
+        }
+    },
+    rebout(category) {
+        return {
+            text: 'Сбросить',
+            callback_data: JSON.stringify({
+                t: 'rebout',
+                categ: category
+            })
+        }
+    },
+    ready(category,ids) {
+        var key =  {
+            text: 'Готово',
+            callback_data: JSON.stringify({
+                t: 'r',
+                c:category,
+                d:ids
+            })
+        }
+        console.log(key.callback_data)
+        console.log(key.callback_data.length)
+        return key
+    },
+    bottle(query){
+        return{
+            text:'Бутылка',
+            callback_data: JSON.stringify({
+
+            })
+        }
+    },
+    cup(query){
+        return{
+            text:'Бутылка',
+            callback_data: JSON.stringify({
+
             })
         }
     }
@@ -51,7 +104,7 @@ module.exports = {
     //     return {
     //         text: 'Назад 🔙',
     //         callback_data: JSON.stringify({
-    //             type: 'unit',
+    //             t: 'unit',
     //             unit: unit
     //         })
     //     }
@@ -60,7 +113,7 @@ module.exports = {
     //     return {
     //         text: 'Назад 🔙',
     //         callback_data: JSON.stringify({
-    //             type: 'back_to_some_category',
+    //             t: 'back_to_some_category',
     //             unit: unit
     //         })
     //     }
@@ -69,7 +122,7 @@ module.exports = {
     //     return {
     //         text: '+10',
     //         callback_data: JSON.stringify({
-    //             type: 'plus10',
+    //             t: 'plus10',
     //             unit:  unit,
     //             isw: isWater
     //         })
@@ -79,7 +132,7 @@ module.exports = {
     //     return {
     //         text: '+',
     //         callback_data: JSON.stringify({
-    //             type: 'plus',
+    //             t: 'plus',
     //             unit:  unit,
     //             isw: isWater
     //         })
@@ -89,7 +142,7 @@ module.exports = {
     //     return {
     //         text: '-',
     //         callback_data: JSON.stringify({
-    //             type: 'minus',
+    //             t: 'minus',
     //             unit:  unit,
     //             isw: isWater
     //         })
@@ -105,7 +158,7 @@ module.exports = {
     //     return {
     //         text: '🗑',
     //         callback_data: JSON.stringify({
-    //             type: 'del',
+    //             t: 'del',
     //             unit:  unit
     //         })
     //     }

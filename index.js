@@ -67,18 +67,28 @@ bot.on('callback_query', function (query) {
         case kb.back_to_home.callback_data :
             helpers.sendHome(bot, chat.id);
             break;
-        // case :
-        //
-        //     break;
+        case kb.clearBasket.callback_data :
+            helpers.clearBasket(bot, chat.id);
+            break;
+        case kb.submitOrder.callback_data:
+            helpers.submitOrder(bot, chat.id, text)
+            break;
         default:
             try {
                 var parceQuery = JSON.parse(query.data);
-                if (parceQuery.type === 'category') {
+                if (parceQuery.t === 'category') {
                     helpers.sendUnits(bot, chat.id, parceQuery.unit)
-                } else if (parceQuery.type === 'basket') {
+                } else if (parceQuery.t === 'basket') {
                     helpers.basket(bot, chat.id, parceQuery.back)
+                } else if (parceQuery.t === 'unit') {
+                    helpers.addUnit(bot, chat.id, parceQuery.id)
+                } else if (parceQuery.t === 'rebout') {
+                    helpers.sendUnits(bot, chat.id, parceQuery.categ)
+                } else if (parceQuery.t === 'ch') {
+                    helpers.checkUnit(bot, chat.id, parceQuery)
+                }else if (parceQuery.t === 'r') {
+                    //helpers.bottleAsk(bot, chat.id, parceQuery)
                 }
-
                 else {
                     bot.sendMessage(chat.id, frases.error_message, keyboard.home)
                 }
