@@ -85,19 +85,29 @@ module.exports = {
         return key
     },
     bottle(query){
+        query.cup = 'but'
+        query.t = 'sub'
         return{
             text:'Бутылка',
-            callback_data: JSON.stringify({
+            callback_data: JSON.stringify(query)
 
-            })
         }
     },
     cup(query){
+        query.cup = 'cup'
+        query.t = 'sub'
         return{
-            text:'Бутылка',
-            callback_data: JSON.stringify({
+            text:'Стакан',
+            callback_data: JSON.stringify(query)
 
-            })
+        }
+    },
+    just_yes(query){
+        query.cup = 'cup'
+        query.t = 'sub'
+        return{
+            text:'Да',
+            callback_data: JSON.stringify(query)
         }
     }
     // back_to_some_category(unit) {

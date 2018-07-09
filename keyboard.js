@@ -28,41 +28,41 @@ module.exports = {
                 [{
                     text: 'Кофе',
                     callback_data: JSON.stringify({
-                        t: 'category',
+                        type: 'category',
                         unit: 'coffee'
                     })
                 },
                     {
                         text: 'Чаи',
                         callback_data: JSON.stringify({
-                            t: 'category',
+                            type: 'category',
                             unit: 'tea'
                         })
                     }],
                 [{
                     text: 'Смузи',
                     callback_data: JSON.stringify({
-                        t: 'category',
+                        type: 'category',
                         unit: 'smhs'
                     })
                 }, {
                     text: 'Фреш',
                     callback_data: JSON.stringify({
-                        t: 'category',
+                        type: 'category',
                         unit: 'fresh'
                     })
                 }],
                 [{
                     text: 'Молочные коктейли',
                     callback_data: JSON.stringify({
-                        t: 'category',
+                        type: 'category',
                         unit: 'milks'
                     })
                 }],
                 [{
                     text: 'Сезонные напитки',
                     callback_data: JSON.stringify({
-                        t: 'category',
+                        type: 'category',
                         unit: 'drinks'
                     })
                 }],
@@ -86,9 +86,28 @@ module.exports = {
             reply_markup: {
                 inline_keyboard: [
                     [kb.bottle(query), kb.cup(query)],
-                    [kb.home]
+                    [kb.back_to_home]
                 ]
             }
+        }
+        return key
+    }, just_ask(query) {
+        var key = {
+            reply_markup: {
+                inline_keyboard: [
+                    [kb.just_yes(query)],
+                    [kb.back_to_home]
+                ]
+            }
+        }
+        return key
+    },
+    ready:{
+        reply_markup: {
+            inline_keyboard: [
+                [kb.basket(kb.back_to_home.callback_data)],
+                [kb.back_to_home]
+            ]
         }
     }
 }
